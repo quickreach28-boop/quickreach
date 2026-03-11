@@ -1,0 +1,2612 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Reach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f5ff;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        /* Page start animation */
+        body.page-loading {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        body.page-loaded {
+            animation: page-entry 600ms cubic-bezier(.22, .61, .36, 1) forwards;
+        }
+
+        @keyframes page-entry {
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .admin-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .admin-panel.active {
+            display: block;
+        }
+
+        .admin-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #4b6cb7;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3a5795;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .login-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .login-form {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .login-form input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* Admin Icon Button */
+        .admin-icon {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 25px rgba(75, 108, 183, 0.4);
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+
+        .admin-icon:hover {
+            background: linear-gradient(135deg, #5a7bc7 0%, #2a3a58 100%);
+            transform: scale(1.15) rotate(15deg);
+            box-shadow: 0 12px 35px rgba(75, 108, 183, 0.6);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .admin-icon:active {
+            transform: scale(1.05) rotate(5deg);
+        }
+
+        .admin-icon::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            background: linear-gradient(45deg, #4b6cb7, #182848, #4b6cb7);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .admin-icon:hover::before {
+            opacity: 0.3;
+        }
+
+        /* Admin Popup Modal */
+        .admin-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .admin-modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .admin-modal h3 {
+            margin-bottom: 20px;
+            color: #4b6cb7;
+            font-size: 24px;
+        }
+
+        .admin-modal .password-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .admin-modal input {
+            width: 100%;
+            padding: 15px 50px 15px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .admin-modal input:focus {
+            outline: none;
+            border-color: #4b6cb7;
+        }
+
+        .admin-modal .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .admin-modal .password-toggle:hover {
+            color: #4b6cb7;
+        }
+
+        .admin-modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .admin-modal .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .admin-modal .btn-primary {
+            background: #4b6cb7;
+            color: white;
+        }
+
+        .admin-modal .btn-primary:hover {
+            background: #3a5a9a;
+        }
+
+        .admin-modal .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .admin-modal .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        /* Back Button */
+        .back-button {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(75, 108, 183, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover {
+            background: rgba(75, 108, 183, 1);
+            transform: translateX(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-button i {
+            font-size: 16px;
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Professional search interface positioned over photo banner */
+        .search-overlay {
+            position: absolute !important;
+            top: 5% !important;
+            /* raise title and caption higher */
+            left: 50% !important;
+            transform: translate(-50%, 0) !important;
+            z-index: 20;
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            /* bring caption very close to title */
+            width: 100%;
+            max-width: 900px;
+            padding: 0 30px;
+            animation: searchFadeIn 1s ease-out;
+        }
+
+        @keyframes searchFadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, 30px) !important;
+            }
+
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0) !important;
+            }
+        }
+
+        /* Keep search overlay locked to top-center */
+        .search-overlay.reveal,
+        .search-overlay.reveal.is-visible {
+            position: absolute !important;
+            top: 5% !important;
+            left: 50% !important;
+            transform: translate(-50%, 0) !important;
+            display: flex !important;
+        }
+
+        .search-overlay .search-controls {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            border-radius: 60px;
+            padding: 20px 35px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2), 0 4px 20px rgba(75, 108, 183, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .search-overlay .search-controls:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.25), 0 6px 25px rgba(75, 108, 183, 0.15);
+        }
+
+        .search-overlay .search-box {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            border-radius: 60px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2), 0 4px 20px rgba(75, 108, 183, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .search-overlay .search-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.25), 0 6px 25px rgba(75, 108, 183, 0.15);
+        }
+
+        .search-overlay .search-type label {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+            padding: 8px 12px;
+            border-radius: 25px;
+            position: relative;
+        }
+
+        .search-overlay .search-type label:hover {
+            background: rgba(75, 108, 183, 0.1);
+            color: #4b6cb7;
+        }
+
+        .search-overlay .search-type input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            accent-color: #4b6cb7;
+        }
+
+        .search-overlay .search-type input[type="radio"]:checked+i {
+            color: #4b6cb7;
+        }
+
+        .search-overlay .search-type i {
+            font-size: 1.1rem;
+            margin-right: 6px;
+            color: #6c757d;
+            transition: color 0.3s ease;
+        }
+
+        .search-overlay #search-input {
+            font-size: 1.2rem;
+            padding: 18px 25px;
+            border: none;
+            background: transparent;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .search-overlay #search-input::placeholder {
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        .search-overlay #search-btn {
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 0 60px 60px 0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-overlay #search-btn:hover {
+            background: linear-gradient(135deg, #3a5795 0%, #0f1a2e 100%);
+            transform: scale(1.02);
+        }
+
+        .search-overlay #search-btn:active {
+            transform: scale(0.98);
+        }
+
+        .search-title {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .search-title h2 {
+            color: white;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 4px 8px rgba(0, 0, 0, 0.6), 0 6px 12px rgba(0, 0, 0, 0.4);
+            letter-spacing: 1px;
+            /* add a subtle dash of spacing to letters */
+            white-space: nowrap;
+            /* keep title on one line */
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+            /* add subtle glow */
+        }
+
+        .search-title h2 i {
+            margin-right: 12px;
+            color: #ffffff;
+        }
+
+        .search-title p {
+            color: #ffffff;
+            font-size: 1.3rem;
+            font-weight: 500;
+            /* slightly bolder for better visibility */
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3);
+            margin: 0;
+            letter-spacing: 0.6px;
+            /* subtle spacing for caption */
+            margin-top: -25px;
+            /* raise caption a little more */
+            filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.1));
+            /* reduced glow intensity */
+        }
+
+        .search-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-type {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-type label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .search-box {
+            display: flex;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 50px;
+            overflow: hidden;
+        }
+
+        .suggestions {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 8px;
+        }
+
+        .suggestions-list {
+            position: absolute;
+            top: 8px;
+            /* place dropdown below input */
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            overflow: auto;
+            max-height: 280px;
+            z-index: 50;
+        }
+
+        .suggestion-item {
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f3f7;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover,
+        .suggestion-item.active {
+            background: #eef4ff;
+        }
+
+        .suggestion-label {
+            font-size: 12px;
+            color: #4b6cb7;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+        #search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            font-size: 1.1rem;
+            outline: none;
+        }
+
+        #search-btn {
+            padding: 15px 25px;
+            background: #4b6cb7;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background 0.3s;
+        }
+
+        #search-btn:hover {
+            background: #3a5795;
+        }
+
+        .results-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 1.2fr 1.5fr 1fr 0.8fr 1.2fr 1.5fr 0.6fr;
+            background: #4b6cb7;
+            color: white;
+            font-weight: bold;
+            padding: 15px 20px;
+        }
+
+        .table-header.user-mode {
+            grid-template-columns: 1.2fr 1.5fr 1fr 0.8fr 1.2fr 1.5fr;
+        }
+
+        .department-row {
+            display: grid;
+            grid-template-columns: 1.2fr 1.5fr 1fr 0.8fr 1.2fr 1.5fr 0.6fr;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+
+        .department-row.user-mode {
+            grid-template-columns: 1.2fr 1.5fr 1fr 0.8fr 1.2fr 1.5fr;
+        }
+
+        .department-row:nth-child(even) {
+            background-color: #f9fafc;
+        }
+
+        .department-row:hover {
+            background-color: #edf1f7;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .department-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .mobile-number {
+            color: #2c5282;
+        }
+
+        .email {
+            color: #8b5cf6;
+            word-break: break-all;
+            position: relative;
+        }
+
+        .email-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .copy-btn {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            color: #2196f3;
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .copy-btn:hover {
+            background: #2196f3;
+            color: white;
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        .copy-success {
+            background: #4caf50 !important;
+            color: white !important;
+            border-color: #4caf50 !important;
+        }
+
+        .instructions {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .instructions h3 {
+            color: #4b6cb7;
+            margin-bottom: 10px;
+        }
+
+        /* Photo banner with professional title */
+        .photo-banner {
+            margin-bottom: 30px;
+            position: relative !important;
+            overflow: visible !important;
+        }
+
+        .photo-banner figure {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            background: #eef2f7;
+            opacity: 0;
+            transform: translateY(14px);
+            animation: banner-reveal 900ms ease-out forwards;
+        }
+
+        .photo-banner img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .photo-banner figcaption {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 16px 20px;
+            color: white;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.0) 100%);
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(8px);
+            animation: caption-reveal 800ms ease-out 250ms forwards;
+        }
+
+        .photo-banner #photo-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: .3px;
+        }
+
+        .photo-banner .title-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: #fff;
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            box-shadow: 0 4px 12px rgba(24, 40, 72, 0.3);
+            animation: title-glow 2600ms ease-in-out infinite alternate;
+        }
+
+        @keyframes title-glow {
+            from {
+                box-shadow: 0 6px 16px rgba(24, 40, 72, 0.28);
+                transform: translateY(0);
+            }
+
+            to {
+                box-shadow: 0 8px 22px rgba(75, 108, 183, 0.55);
+                transform: translateY(-1px);
+            }
+        }
+
+        /* Enhanced typing animation with multiple effects */
+        .typing-text {
+            overflow: hidden;
+            border-right: 2px solid #fff;
+            white-space: nowrap;
+            animation: typing 2s steps(25, end), blink-caret 0.75s step-end infinite, text-glow 3s ease-in-out infinite alternate;
+            position: relative;
+        }
+
+        /* One-time typing effect for initial page load (no continuous blink) */
+        .typing-once {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid #fff;
+            width: 0;
+        }
+
+        /* Start typing only after page reveals */
+        body.start-typing .typing-once {
+            animation: typing 2.1s steps(var(--typing-steps, 25), end) forwards, caret-hide 0s linear 2.1s forwards;
+        }
+
+        @keyframes caret-hide {
+            to {
+                border-right-color: transparent;
+            }
+        }
+
+        .typing-text::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            animation: shimmer 2.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes typing {
+            from {
+                width: 0;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+
+        @keyframes blink-caret {
+
+            from,
+            to {
+                border-color: transparent;
+            }
+
+            50% {
+                border-color: #fff;
+            }
+        }
+
+        @keyframes text-glow {
+            from {
+                text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px rgba(255, 255, 255, 0.3);
+                transform: scale(1);
+            }
+
+            to {
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5), 0 0 30px rgba(255, 255, 255, 0.3);
+                transform: scale(1.02);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* Background based media so it still shows if image fails */
+        .photo-banner .banner-media {
+            width: 100%;
+            display: block;
+            padding-top: 45%;
+            /* taller to show full board/sign */
+            background-color: #e1e7f3;
+            background-image: var(--banner-image, none);
+            background-size: cover;
+            background-position: top center;
+            /* focus on hospital board */
+            background-repeat: no-repeat;
+            transform: scale(1.06);
+            animation: banner-kenburns 8s ease-out forwards;
+            image-rendering: -webkit-optimize-contrast;
+            /* improve image quality */
+            image-rendering: crisp-edges;
+            /* improve image quality */
+        }
+
+        /* Global professional reveal animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 600ms cubic-bezier(.22, .61, .36, 1), transform 600ms cubic-bezier(.22, .61, .36, 1);
+            transition-delay: var(--reveal-delay, 0ms);
+            will-change: opacity, transform;
+        }
+
+        .reveal.is-visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* Simple entrance and Ken Burns animations */
+        @keyframes banner-reveal {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes caption-reveal {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes banner-kenburns {
+            from {
+                transform: scale(1.06);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        /* Respect user motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+
+            .photo-banner figure,
+            .photo-banner .banner-media,
+            .photo-banner figcaption,
+            .reveal {
+                animation: none !important;
+                transition: none !important;
+                transform: none !important;
+                opacity: 1 !important;
+            }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            min-width: 160px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-box h3 {
+            color: #4b6cb7;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        /* Colored stat boxes matching logo colors */
+        .stat-green {
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%) !important;
+            color: white !important;
+        }
+
+        .stat-green h3 {
+            color: white !important;
+        }
+
+        .stat-blue {
+            background: linear-gradient(135deg, #2196f3 0%, #1565c0 100%) !important;
+            color: white !important;
+        }
+
+        .stat-blue h3 {
+            color: white !important;
+        }
+
+        .stat-yellow {
+            background: linear-gradient(135deg, #ffc107 0%, #f57c00 100%) !important;
+            color: #333 !important;
+        }
+
+        .stat-yellow h3 {
+            color: #333 !important;
+        }
+
+        .stat-red {
+            background: linear-gradient(135deg, #f44336 0%, #c62828 100%) !important;
+            color: white !important;
+        }
+
+        .stat-red h3 {
+            color: white !important;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #4b6cb7;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            background: #f8f9ff;
+        }
+
+        .file-upload-area.dragover {
+            background: #e6f0ff;
+            border-color: #2c5282;
+        }
+
+        #file-input {
+            margin: 10px 0;
+        }
+
+        .import-preview {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .import-preview table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .import-preview th,
+        .import-preview td {
+            padding: 8px;
+            border: 1px solid #eee;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        .import-preview th {
+            background: #f5f5f5;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            /* Fix banner being too small vertically on narrow screens */
+            .photo-banner .banner-media {
+                padding-top: 140%; /* Make mobile banner tall enough to hold the generous search box styling */
+                background-position: center;
+            }
+
+            .search-overlay {
+                position: absolute !important;
+                top: 4% !important;
+                left: 50% !important;
+                transform: translate(-50%, 0) !important;
+                padding: 0 15px;
+                gap: 5px;
+                width: 100%;
+                max-height: 90%;
+            }
+
+            .search-title h2 {
+                font-size: 1.8rem;
+                white-space: normal;
+                line-height: 1.25;
+                margin-bottom: 5px;
+                text-align: center;
+                letter-spacing: 0px;
+            }
+
+            .search-title p {
+                font-size: 1rem;
+                margin-top: 0;
+                margin-bottom: 15px;
+            }
+
+            .search-overlay .search-box {
+                flex-direction: column;
+                background: transparent;
+                box-shadow: none;
+                border: none;
+                gap: 15px;
+                width: 100%;
+                max-width: 320px; /* Keep input field from becoming too wide on landscape phones */
+                margin: 0 auto;
+            }
+
+            .search-overlay #search-input {
+                border-radius: 50px;
+                width: 100%;
+                font-size: 1.1rem;
+                padding: 16px 20px;
+                text-align: center;
+                background: rgba(255, 255, 255, 0.98);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+                border: 2px solid transparent;
+            }
+            
+            .search-overlay #search-input:focus {
+                border-color: #4b6cb7;
+                box-shadow: 0 10px 30px rgba(75, 108, 183, 0.3);
+            }
+
+            .search-overlay #search-btn {
+                border-radius: 50px;
+                width: 100%;
+                padding: 16px 20px;
+                font-size: 1.2rem;
+                box-shadow: 0 8px 25px rgba(75, 108, 183, 0.4);
+                background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            }
+
+            .search-overlay #search-btn:active {
+                transform: scale(0.96);
+            }
+
+            .suggestions {
+                width: 100%;
+                max-width: 320px;
+                margin: 0 auto;
+            }
+
+            .suggestions-list {
+                max-height: 180px;
+                border-radius: 20px;
+            }
+            
+            .results-container {
+                background: transparent;
+                box-shadow: none;
+            }
+
+            .table-header {
+                display: none;
+            }
+
+            .department-row {
+                padding: 22px 18px;
+                background: white;
+                border-radius: 16px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+                margin-bottom: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                border: 1px solid #eef2f7;
+                transform: translateZ(0); /* hardware accel */
+            }
+
+            .department-row:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            }
+
+            .department-row>div {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                padding: 2px 0;
+            }
+
+            .department-row>div:before {
+                content: attr(data-label);
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                font-weight: 700;
+                color: #a0aec0;
+                margin-bottom: 4px;
+            }
+
+            .department-name {
+                font-size: 1.35rem !important;
+                color: #2d3748 !important;
+                font-weight: 800;
+            }
+            
+            .mobile-number {
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: #3182ce;
+            }
+
+            .email {
+                font-size: 0.9rem;
+            }
+
+            .email-container {
+                flex-direction: column;
+                gap: 8px;
+                background: #f7fafc;
+                padding: 10px;
+                border-radius: 10px;
+                width: 100%;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                margin-top: 15px;
+            }
+
+            .stat-box {
+                padding: 20px 10px;
+                border-radius: 15px;
+            }
+
+            .admin-controls {
+                justify-content: center;
+                gap: 12px;
+                padding: 10px;
+            }
+
+            .admin-controls .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 14px;
+                font-size: 15px;
+                border-radius: 10px;
+            }
+
+            .admin-icon {
+                bottom: 15px;
+                right: 15px;
+                width: 55px;
+                height: 55px;
+                font-size: 22px;
+            }
+
+            .modal-content {
+                width: 92%;
+                margin: 15% auto;
+                padding: 25px 20px;
+                border-radius: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body class="page-loading">
+    <div class="container">
+        <!-- Professional Photo with Title and Search Interface -->
+        <div class="photo-banner" aria-labelledby="photo-title">
+            <figure style="--banner-image: url('https://i.postimg.cc/R0r4HWf3/Melsta-Hospitals-Ragama.jpg');">
+                <div class="banner-media" role="img" aria-label="Exterior of Melsta Hospitals building under blue sky">
+                </div>
+            </figure>
+
+            <!-- Admin Icon Button -->
+            <button class="admin-icon" onclick="openAdminModal()" title="Admin Access">
+                <i class="fas fa-user-shield"></i>
+            </button>
+
+            <!-- Back Button -->
+            <button class="back-button" onclick="goToHomePage()" title="Back to Home" style="display: none;">
+                <i class="fas fa-arrow-left"></i>
+                Back to Home
+            </button>
+
+            <!-- Professional Search Interface Overlay -->
+            <div class="search-overlay reveal" style="--reveal-delay: 200ms;">
+                <!-- Professional Title -->
+                <div class="search-title">
+                    <h2><span class="typing-once" style="--typing-steps: 20"><i class="fas fa-search"></i>
+                            QuickReach</span></h2>
+                    <p>Fast Way to Reach Internal Staff.</p>
+                </div>
+
+                <!-- Search Input -->
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Enter search term...">
+                    <button id="search-btn">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+                <div id="search-suggestions" class="suggestions" role="listbox" aria-label="Search suggestions"></div>
+            </div>
+        </div>
+
+
+        <!-- Admin Popup Modal -->
+        <div id="adminModal" class="admin-modal">
+            <div class="admin-modal-content">
+                <h3><i class="fas fa-user-shield"></i> Admin Access</h3>
+                <div class="password-container">
+                    <input type="password" id="admin-password" placeholder="Enter admin password" autocapitalize="none" autocorrect="off" spellcheck="false">
+                    <button type="button" class="password-toggle" onclick="togglePasswordVisibility()">
+                        <i class="fas fa-eye" id="password-icon"></i>
+                    </button>
+                </div>
+                <div class="admin-modal-buttons">
+                    <button class="btn btn-primary" onclick="toggleAdminMode()">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeAdminModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div class="admin-panel reveal" id="admin-panel" style="--reveal-delay: 120ms;">
+            <h3><i class="fas fa-cogs"></i> Admin Controls</h3>
+            <div class="admin-controls">
+                <button class="btn btn-success" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i> Add New Contact
+                </button>
+                <button class="btn btn-primary" onclick="openImportModal()">
+                    <i class="fas fa-file-import"></i> Import Data
+                </button>
+                <button class="btn btn-warning" onclick="exportData()">
+                    <i class="fas fa-download"></i> Export to CSV
+                </button>
+                <button class="btn btn-danger" onclick="clearAllData()">
+                    <i class="fas fa-trash"></i> Clear All Data
+                </button>
+                <button class="btn" id="db-connect-btn" style="background: #6f42c1; color: white;"
+                    onclick="setupLocalDatabase()">
+                    <i class="fas fa-database"></i> Connect Local Database File
+                </button>
+            </div>
+        </div>
+
+        <div class="stats reveal" id="stats-section" style="--reveal-delay: 240ms; display: none;">
+            <div class="stat-box stat-green">
+                <h3><i class="fas fa-building"></i> Departments</h3>
+                <span id="dept-count">28</span>
+            </div>
+            <div class="stat-box stat-blue">
+                <h3><i class="fas fa-users"></i> Staff Members</h3>
+                <span id="staff-count">85</span>
+            </div>
+            <div class="stat-box stat-yellow">
+                <h3><i class="fas fa-phone"></i> Extensions</h3>
+                <span id="ext-count">72</span>
+            </div>
+            <div class="stat-box stat-red">
+                <h3><i class="fas fa-envelope"></i> Email</h3>
+                <span id="email-count">45</span>
+            </div>
+        </div>
+
+        <div class="results-container reveal" style="--reveal-delay: 280ms;">
+            <div class="table-header user-mode" id="table-header">
+                <div>Department</div>
+                <div>Name</div>
+                <div>Designation</div>
+                <div>Extension</div>
+                <div>Mobile No.</div>
+                <div>Email</div>
+                <div></div>
+            </div>
+            <div id="results">
+                <!-- Results will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Contact Modal -->
+    <div id="contact-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-title">Add New Contact</h2>
+            <form id="contact-form">
+                <div class="form-group">
+                    <label for="dept-input">Department:</label>
+                    <input type="text" id="dept-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="name-input">Name:</label>
+                    <input type="text" id="name-input">
+                </div>
+                <div class="form-group">
+                    <label for="designation-input">Designation:</label>
+                    <input type="text" id="designation-input">
+                </div>
+                <div class="form-group">
+                    <label for="ext-input">Extension:</label>
+                    <input type="text" id="ext-input">
+                </div>
+                <div class="form-group">
+                    <label for="mobile-input">Mobile Number:</label>
+                    <input type="text" id="mobile-input">
+                </div>
+                <div class="form-group">
+                    <label for="email-input">Email:</label>
+                    <input type="email" id="email-input">
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-danger" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Import Data Modal -->
+    <div id="import-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Import Contacts</h2>
+            <div class="file-upload-area" id="file-drop-area">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #4b6cb7;"></i>
+                <p>Drag & drop your Excel/CSV file here or click to browse</p>
+                <input type="file" id="file-input" accept=".xlsx,.xls,.csv" style="display: none;">
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('file-input').click()">
+                    <i class="fas fa-file-upload"></i> Choose File
+                </button>
+            </div>
+            <div id="file-info"></div>
+            <div id="import-preview" class="import-preview"></div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+                <button type="button" class="btn btn-danger" onclick="closeImportModal()">Cancel</button>
+                <button type="button" class="btn btn-success" id="import-confirm-btn" onclick="confirmImport()"
+                    disabled>
+                    <i class="fas fa-check"></i> Import Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include SheetJS library for Excel file processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+        // Admin credentials and state
+        const ADMIN_PASSWORD = "melsta2024admin"; // Change this to your desired password
+        let isAdminMode = false;
+        let editingIndex = -1;
+        let importData = [];
+        let departmentData = [];
+
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzqcLovVRXBmAKkBmGf0wMmzkMt5UhIz5smEMIqcXDpPpiY141YeQDYBglozUJ2drlH/exec';
+
+        async function syncToGoogleSheets(data) {
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    mode: 'no-cors'
+                });
+            } catch (e) {
+                console.error('Error syncing to Google Sheets:', e);
+            }
+        }
+
+        // Local Database File System Access API
+        const DB_NAME = "MelstaAppDB";
+        const STORE_NAME = "FileHandles";
+        let dbFileHandle = null;
+
+        async function saveHandleToIndexedDB(handle) {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+                request.onupgradeneeded = (e) => e.target.result.createObjectStore(STORE_NAME);
+                request.onsuccess = (e) => {
+                    const tx = e.target.result.transaction(STORE_NAME, 'readwrite');
+                    tx.objectStore(STORE_NAME).put(handle, 'db_handle');
+                    tx.oncomplete = () => resolve();
+                };
+                request.onerror = (err) => reject(err);
+            });
+        }
+
+        async function getHandleFromIndexedDB() {
+            return new Promise((resolve) => {
+                const request = indexedDB.open(DB_NAME, 1);
+                request.onupgradeneeded = (e) => e.target.result.createObjectStore(STORE_NAME);
+                request.onsuccess = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) { resolve(null); return; }
+                    const tx = db.transaction(STORE_NAME, 'readonly');
+                    const getReq = tx.objectStore(STORE_NAME).get('db_handle');
+                    getReq.onsuccess = () => resolve(getReq.result);
+                    getReq.onerror = () => resolve(null);
+                };
+                request.onerror = () => resolve(null);
+            });
+        }
+
+        async function setupLocalDatabase() {
+            try {
+                if (!dbFileHandle) {
+                    [dbFileHandle] = await window.showOpenFilePicker({
+                        types: [{ description: 'CSV File', accept: { 'text/csv': ['.csv'] } }]
+                    });
+                }
+
+                const opts = { mode: 'readwrite' };
+                if ((await dbFileHandle.queryPermission(opts)) !== 'granted') {
+                    await dbFileHandle.requestPermission(opts);
+                }
+
+                if ((await dbFileHandle.queryPermission(opts)) === 'granted') {
+                    await saveHandleToIndexedDB(dbFileHandle);
+                    const file = await dbFileHandle.getFile();
+                    const text = await file.text();
+                    departmentData = parseCSVTextToContacts(text);
+                    displayResults(departmentData);
+                    calculateStats();
+                    alert("Local Database Connected Successfully!\\nAny changes will automatically save directly to this file, without you having to copy/paste or download.");
+                    updateDBButton();
+                }
+            } catch (e) { console.error('DB connect failed:', e); }
+        }
+
+        function updateDBButton() {
+            const btn = document.getElementById('db-connect-btn');
+            if (btn && dbFileHandle) {
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Local DB Connected';
+                btn.style.background = '#28a745';
+            }
+        }
+
+        // Persistence: localStorage key
+        const STORAGE_KEY = 'melsta_department_contacts_v1';
+
+        // Save data to localStorage and File DB
+        async function saveData() {
+            try {
+                const dataToSave = JSON.stringify(departmentData);
+                localStorage.setItem(STORAGE_KEY, dataToSave);
+            } catch (error) {
+                console.error('Error saving data:', error);
+            }
+
+            // Sync to Google Sheets
+            syncToGoogleSheets(departmentData || []);
+
+            // Auto overwrite the connected physical file (no download/paste needed!)
+            if (dbFileHandle) {
+                try {
+                    const opts = { mode: 'readwrite' };
+                    if ((await dbFileHandle.queryPermission(opts)) === 'granted') {
+                        const writable = await dbFileHandle.createWritable();
+                        const csv = convertToCSV(departmentData);
+                        await writable.write(csv);
+                        await writable.close();
+                        console.log("Auto-saved to local file directly.");
+                    }
+                } catch (e) {
+                    console.error('Failed to auto-save to local file', e);
+                }
+            }
+        }
+
+        // Load data from localStorage (if exists)
+        function loadData() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return false;
+                const parsed = JSON.parse(raw);
+                if (!Array.isArray(parsed)) return false;
+                // Basic shape validation
+                departmentData = parsed.map(item => ({
+                    department: item.department || '',
+                    name: item.name || '',
+                    designation: item.designation || '',
+                    extension: item.extension || '',
+                    mobile: item.mobile || '',
+                    email: item.email || ''
+                }));
+                return true;
+            } catch (error) {
+                console.error('Error loading data:', error);
+                return false;
+            }
+        }
+
+        // Admin modal functions
+        function openAdminModal() {
+            document.getElementById('adminModal').style.display = 'block';
+            document.getElementById('admin-password').focus();
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').style.display = 'none';
+            document.getElementById('admin-password').value = '';
+            // Reset password visibility to hidden
+            document.getElementById('admin-password').type = 'password';
+            document.getElementById('password-icon').className = 'fas fa-eye';
+        }
+
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('admin-password');
+            const passwordIcon = document.getElementById('password-icon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.className = 'fas fa-eye';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            const modal = document.getElementById('adminModal');
+            if (event.target === modal) {
+                closeAdminModal();
+            }
+        }
+
+        // Keyboard support for admin modal
+        document.addEventListener('keydown', function (event) {
+            const modal = document.getElementById('adminModal');
+            if (modal.style.display === 'block') {
+                if (event.key === 'Escape') {
+                    closeAdminModal();
+                } else if (event.key === 'Enter') {
+                    toggleAdminMode();
+                }
+            }
+        });
+
+        // Admin authentication
+        function toggleAdminMode() {
+            const password = document.getElementById('admin-password').value.trim();
+            if (password === ADMIN_PASSWORD) {
+                isAdminMode = true;
+                document.getElementById('admin-panel').classList.add('active');
+                document.getElementById('stats-section').style.display = 'grid';
+                document.getElementById('table-header').classList.remove('user-mode');
+                document.querySelector('.back-button').style.display = 'flex';
+                closeAdminModal();
+                alert('Admin access granted!');
+                displayResults(departmentData);
+            } else {
+                alert('Incorrect password!');
+                document.getElementById('admin-password').value = '';
+                document.getElementById('admin-password').focus();
+            }
+        }
+
+        function logout() {
+            isAdminMode = false;
+            document.getElementById('admin-panel').classList.remove('active');
+            document.getElementById('stats-section').style.display = 'none';
+            document.getElementById('table-header').classList.add('user-mode');
+            document.querySelector('.back-button').style.display = 'none';
+            displayResults(departmentData);
+        }
+
+        function goToHomePage() {
+            // Hide admin panel and show home content
+            document.getElementById('admin-panel').classList.remove('active');
+            document.getElementById('stats-section').style.display = 'none';
+            document.getElementById('table-header').classList.add('user-mode');
+            document.querySelector('.back-button').style.display = 'none';
+
+            // Clear search and show all results
+            document.getElementById('search-input').value = '';
+            displayResults(departmentData);
+
+            // Scroll to top of page
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Modal functions
+        function openAddModal() {
+            editingIndex = -1;
+            document.getElementById('modal-title').textContent = 'Add New Contact';
+            document.getElementById('contact-form').reset();
+            document.getElementById('contact-modal').style.display = 'block';
+        }
+
+        function openEditModal(index) {
+            editingIndex = index;
+            const contact = departmentData[index];
+            document.getElementById('modal-title').textContent = 'Edit Contact';
+            document.getElementById('dept-input').value = contact.department;
+            document.getElementById('name-input').value = contact.name;
+            document.getElementById('designation-input').value = contact.designation;
+            document.getElementById('ext-input').value = contact.extension;
+            document.getElementById('mobile-input').value = contact.mobile;
+            document.getElementById('email-input').value = contact.email;
+            document.getElementById('contact-modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('contact-modal').style.display = 'none';
+        }
+
+        function deleteContact(index) {
+            if (confirm('Are you sure you want to delete this contact?')) {
+                departmentData.splice(index, 1);
+                saveData();
+                displayResults(departmentData);
+                calculateStats();
+            }
+        }
+
+        // Import functions
+        function openImportModal() {
+            document.getElementById('import-modal').style.display = 'block';
+        }
+
+        function closeImportModal() {
+            document.getElementById('import-modal').style.display = 'none';
+            document.getElementById('file-info').innerHTML = '';
+            document.getElementById('import-preview').innerHTML = '';
+            document.getElementById('import-confirm-btn').disabled = true;
+            importData = [];
+        }
+
+        // Export function
+        function exportData() {
+            const csv = convertToCSV(departmentData);
+            downloadCSV(csv, 'melsta_hospital_contacts.csv');
+            alert('A file named "melsta_hospital_contacts.csv" has been downloaded. \\n\\nIMPORTANT: To share these updates with everyone, please copy and replace the downloaded file into the NAS folder where this HTML file is located.');
+        }
+
+        function convertToCSV(data) {
+            const headers = ['Department', 'Name', 'Designation', 'Extension', 'Mobile', 'Email'];
+            const csvContent = [
+                headers.join(','),
+                ...data.map(row => [
+                    `"${row.department}"`,
+                    `"${row.name}"`,
+                    `"${row.designation}"`,
+                    `"${row.extension}"`,
+                    `"${row.mobile}"`,
+                    `"${row.email}"`
+                ].join(','))
+            ].join('\n');
+            return csvContent;
+        }
+
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to delete ALL contacts? This cannot be undone!')) {
+                if (confirm('This will permanently delete all data. Are you absolutely sure?')) {
+                    departmentData = [];
+                    saveData();
+                    displayResults(departmentData);
+                    calculateStats();
+                    try { localStorage.removeItem(STORAGE_KEY); } catch (e) { }
+                    alert('All data has been cleared.');
+                }
+            }
+        }
+
+        // File handling
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+        }
+
+        function processFile(file) {
+            const reader = new FileReader();
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+
+            document.getElementById('file-info').innerHTML = `
+                <p><strong>File:</strong> ${file.name}</p>
+                <p><strong>Size:</strong> ${(file.size / 1024).toFixed(2)} KB</p>
+            `;
+
+            reader.onload = function (e) {
+                try {
+                    if (fileExtension === 'csv') {
+                        parseCSV(e.target.result);
+                    } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+                        parseExcel(e.target.result);
+                    }
+                } catch (error) {
+                    alert('Error processing file: ' + error.message);
+                }
+            };
+
+            if (fileExtension === 'csv') {
+                reader.readAsText(file);
+            } else {
+                reader.readAsBinaryString(file);
+            }
+        }
+
+        // Shared CSV parsing helper: convert raw CSV text into contact objects
+        function parseCSVTextToContacts(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim() !== '');
+            if (lines.length === 0) return [];
+
+            const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+            const data = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+                const row = {};
+                headers.forEach((header, index) => {
+                    row[header.toLowerCase()] = values[index] || '';
+                });
+                data.push(row);
+            }
+
+            return data.map(row => ({
+                department: row.department || '',
+                name: row.name || '',
+                designation: row.designation || '',
+                extension: row.extension || '',
+                mobile: row.mobile || row['mobile no.'] || '',
+                email: row.email || ''
+            }));
+        }
+
+        // Parse CSV coming from the Import dialog
+        function parseCSV(csvText) {
+            importData = parseCSVTextToContacts(csvText);
+            displayImportPreview();
+        }
+
+        function parseExcel(binaryString) {
+            const workbook = XLSX.read(binaryString, { type: 'binary' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            importData = jsonData.map(row => ({
+                department: row.Department || row.department || '',
+                name: row.Name || row.name || '',
+                designation: row.Designation || row.designation || '',
+                extension: row.Extension || row.extension || '',
+                mobile: row.Mobile || row['Mobile No.'] || row.mobile || '',
+                email: row.Email || row.email || ''
+            }));
+
+            displayImportPreview();
+        }
+
+        function displayImportPreview() {
+            if (importData.length === 0) {
+                document.getElementById('import-preview').innerHTML = '<p>No valid data found in file.</p>';
+                return;
+            }
+
+            const previewHtml = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Department</th>
+                            <th>Name</th>
+                            <th>Designation</th>
+                            <th>Extension</th>
+                            <th>Mobile</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${importData.slice(0, 10).map(row => `
+                            <tr>
+                                <td>${row.department}</td>
+                                <td>${row.name}</td>
+                                <td>${row.designation}</td>
+                                <td>${row.extension}</td>
+                                <td>${row.mobile}</td>
+                                <td>${row.email}</td>
+                            </tr>
+                        `).join('')}
+                        ${importData.length > 10 ? `<tr><td colspan="6"><em>... and ${importData.length - 10} more rows</em></td></tr>` : ''}
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('import-preview').innerHTML = previewHtml;
+            document.getElementById('import-confirm-btn').disabled = false;
+        }
+
+        function confirmImport() {
+            if (importData.length === 0) {
+                alert('No data to import.');
+                return;
+            }
+
+            const confirmText = `Import ${importData.length} contacts? This will add to existing data.`;
+            if (confirm(confirmText)) {
+                departmentData.push(...importData);
+                saveData();
+                displayResults(departmentData);
+                calculateStats();
+                closeImportModal();
+                alert(`Successfully imported ${importData.length} contacts.`);
+            }
+        }
+
+        // Drag and drop functionality
+        function setupDragDrop() {
+            const dropArea = document.getElementById('file-drop-area');
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight(e) {
+                dropArea.classList.add('dragover');
+            }
+
+            function unhighlight(e) {
+                dropArea.classList.remove('dragover');
+            }
+
+            dropArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    processFile(files[0]);
+                }
+            }
+
+            dropArea.addEventListener('click', () => {
+                document.getElementById('file-input').click();
+            });
+        }
+
+        // Calculate statistics
+        function calculateStats() {
+            const deptSet = new Set();
+            let staffCount = 0;
+            let extCount = 0;
+            let emailCount = 0;
+
+            departmentData.forEach(item => {
+                deptSet.add(item.department);
+                if (item.name) staffCount++;
+                if (item.extension) extCount++;
+                if (item.email) emailCount++;
+            });
+
+            document.getElementById('dept-count').textContent = deptSet.size;
+            document.getElementById('staff-count').textContent = staffCount;
+            document.getElementById('ext-count').textContent = extCount;
+            document.getElementById('email-count').textContent = emailCount;
+        }
+
+        // Function to display results
+        function displayResults(results) {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '';
+
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<div class="no-results">No results found matching your search.</div>';
+                return;
+            }
+
+            results.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.className = isAdminMode ? 'department-row' : 'department-row user-mode';
+                row.innerHTML = `
+                    <div class="department-name" data-label="Department">${item.department}</div>
+                    <div data-label="Name">${item.name}</div>
+                    <div data-label="Designation">${item.designation}</div>
+                    <div data-label="Extension">${item.extension}</div>
+                    <div class="mobile-number" data-label="Mobile">${item.mobile}</div>
+                    <div class="email-container" data-label="Email">
+                        <span class="email">${item.email}</span>
+                        ${item.email ? `<button class="copy-btn" onclick="copyEmail('${item.email}', this)" title="Copy email address">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>` : ''}
+                    </div>
+                    <div class="action-buttons" data-label="Actions">
+                        ${isAdminMode ? `
+                            <button class="btn btn-primary btn-sm" onclick="openEditModal(${departmentData.indexOf(item)})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteContact(${departmentData.indexOf(item)})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+                resultsContainer.appendChild(row);
+            });
+        }
+
+        // Helper to get selected search type (fallback if radios are removed)
+        function getSelectedSearchType() {
+            const selected = document.querySelector('input[name="search-type"]:checked');
+            // If radios are removed, use 'auto' to search across all fields
+            return selected ? selected.value : 'auto';
+        }
+
+        // Function to handle search
+        function handleSearch() {
+            const searchTerm = document.getElementById('search-input').value.trim().toUpperCase();
+            const searchType = getSelectedSearchType();
+
+            if (searchTerm === '') {
+                displayResults(departmentData);
+                return;
+            }
+
+            let results = [];
+
+            switch (searchType) {
+                case 'department':
+                    results = departmentData.filter(item =>
+                        item.department.toUpperCase().includes(searchTerm)
+                    );
+                    break;
+                case 'name':
+                    results = departmentData.filter(item =>
+                        item.name.toUpperCase().includes(searchTerm)
+                    );
+                    break;
+                case 'designation':
+                    results = departmentData.filter(item =>
+                        item.designation.toUpperCase().includes(searchTerm)
+                    );
+                    break;
+                case 'email':
+                    results = departmentData.filter(item =>
+                        (item.email || '').toUpperCase().includes(searchTerm)
+                    );
+                    break;
+                case 'auto':
+                    results = departmentData.filter(item => {
+                        const dept = (item.department || '').toUpperCase();
+                        const name = (item.name || '').toUpperCase();
+                        const desig = (item.designation || '').toUpperCase();
+                        const ext = (item.extension || '').toString().toUpperCase();
+                        const mobile = (item.mobile || '').toString().toUpperCase();
+                        const email = (item.email || '').toUpperCase();
+                        return (
+                            dept.includes(searchTerm) ||
+                            name.includes(searchTerm) ||
+                            desig.includes(searchTerm) ||
+                            ext.includes(searchTerm) ||
+                            mobile.includes(searchTerm) ||
+                            email.includes(searchTerm)
+                        );
+                    });
+                    break;
+            }
+
+            displayResults(results);
+            scrollToResults();
+        }
+
+        // Smoothly scroll to results container with a top offset so content isn't hidden
+        function scrollToResults() {
+            const container = document.querySelector('.results-container');
+            if (!container) return;
+            const offset = 100; // pixels
+            const y = container.getBoundingClientRect().top + window.pageYOffset - offset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+
+        // Form submission handler for Add / Edit Contact
+        document.getElementById('contact-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const contact = {
+                department: document.getElementById('dept-input').value,
+                name: document.getElementById('name-input').value,
+                designation: document.getElementById('designation-input').value,
+                extension: document.getElementById('ext-input').value,
+                mobile: document.getElementById('mobile-input').value,
+                email: document.getElementById('email-input').value
+            };
+
+            if (editingIndex >= 0) {
+                departmentData[editingIndex] = contact;
+                alert('Contact updated successfully!');
+            } else {
+                departmentData.push(contact);
+                alert('Contact added successfully!');
+            }
+
+            saveData();
+            displayResults(departmentData);
+            calculateStats();
+            closeModal();
+        });
+
+        // Event listeners
+        document.getElementById('search-btn').addEventListener('click', handleSearch);
+
+        document.getElementById('search-input').addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                handleSearch();
+            }
+            updateSuggestions(e);
+        });
+
+        (function attachSearchTypeListeners() {
+            const radios = document.querySelectorAll('input[name="search-type"]');
+            if (!radios || radios.length === 0) return; // radios removed in UI
+            radios.forEach(radio => {
+                radio.addEventListener('change', () => { handleSearch(); clearSuggestions(); });
+            });
+        })();
+
+        document.getElementById('file-input').addEventListener('change', handleFileSelect);
+
+        // ---------- Auto-suggestion logic ----------
+        let activeSuggestionIndex = -1;
+
+        function getSuggestionPool(term) {
+            const type = getSelectedSearchType();
+            const U = term.toUpperCase();
+            return departmentData.filter(item => {
+                const dept = (item.department || '').toUpperCase();
+                const name = (item.name || '').toUpperCase();
+                const desig = (item.designation || '').toUpperCase();
+                const ext = (item.extension || '').toString().toUpperCase();
+                const mobile = (item.mobile || '').toString().toUpperCase();
+                const email = (item.email || '').toUpperCase();
+                switch (type) {
+                    case 'department': return dept.includes(U);
+                    case 'name': return name.includes(U);
+                    case 'designation': return desig.includes(U);
+                    case 'email': return email.includes(U);
+                    case 'auto': default:
+                        return dept.includes(U) || name.includes(U) || desig.includes(U) ||
+                            ext.includes(U) || mobile.includes(U) || email.includes(U);
+                }
+            });
+        }
+
+        function updateSuggestions(e) {
+            const input = document.getElementById('search-input');
+            const term = input.value.trim().toUpperCase();
+            const container = document.getElementById('search-suggestions');
+            if (!term) { clearSuggestions(); return; }
+
+            const suggestions = [];
+            const seen = new Set();
+            getSuggestionPool(term).forEach(contact => {
+                const name = contact.name || '';
+                const designation = contact.designation || '';
+                const key = `${name}|${designation}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    suggestions.push({
+                        name,
+                        designation,
+                        display: designation ? `${name} — ${designation}` : name
+                    });
+                }
+            });
+
+            const list = suggestions.slice(0, 8);
+            if (list.length === 0) { clearSuggestions(); return; }
+
+            const html = `
+                <div class="suggestions-list">
+                    ${list.map((s, idx) => `
+                        <div class="suggestion-item" role="option" data-index="${idx}">
+                            <span class="suggestion-label">Suggest</span>
+                            <span>${s.display}</span>
+                        </div>
+                    `).join('')}
+                </div>`;
+            container.innerHTML = html;
+            activeSuggestionIndex = -1;
+
+            container.querySelectorAll('.suggestion-item').forEach((el, idx) => {
+                el.addEventListener('mousedown', () => {
+                    input.value = list[idx].name || el.querySelector('span:last-child').textContent;
+                    clearSuggestions();
+                    handleSearch();
+                });
+            });
+
+            handleSuggestionKeyboard(input, container, list.length, e);
+        }
+
+        function handleSuggestionKeyboard(input, container, count, e) {
+            if (!['ArrowDown', 'ArrowUp', 'Enter', 'Escape'].includes(e.key)) return;
+            const items = container.querySelectorAll('.suggestion-item');
+            if (e.key === 'ArrowDown') {
+                activeSuggestionIndex = (activeSuggestionIndex + 1) % count;
+            } else if (e.key === 'ArrowUp') {
+                activeSuggestionIndex = (activeSuggestionIndex - 1 + count) % count;
+            } else if (e.key === 'Enter' && activeSuggestionIndex >= 0) {
+                e.preventDefault();
+                input.value = items[activeSuggestionIndex].querySelector('span:last-child').textContent;
+                clearSuggestions();
+                handleSearch();
+                return;
+            } else if (e.key === 'Escape') {
+                clearSuggestions();
+                return;
+            }
+
+            items.forEach((el, idx) => el.classList.toggle('active', idx === activeSuggestionIndex));
+        }
+
+        function clearSuggestions() {
+            document.getElementById('search-suggestions').innerHTML = '';
+            activeSuggestionIndex = -1;
+        }
+
+        // Close modal when clicking outside or on close button
+        window.addEventListener('click', function (event) {
+            const contactModal = document.getElementById('contact-modal');
+            const importModal = document.getElementById('import-modal');
+
+            if (event.target === contactModal) {
+                closeModal();
+            }
+            if (event.target === importModal) {
+                closeImportModal();
+            }
+        });
+
+        document.querySelectorAll('.close').forEach(closeBtn => {
+            closeBtn.addEventListener('click', function () {
+                closeModal();
+                closeImportModal();
+            });
+        });
+
+        // Function to copy email address to clipboard
+        function copyEmail(email, button) {
+            if (navigator.clipboard && window.isSecureContext) {
+                // Use modern clipboard API
+                navigator.clipboard.writeText(email).then(() => {
+                    showCopySuccess(button);
+                }).catch(() => {
+                    fallbackCopyTextToClipboard(email, button);
+                });
+            } else {
+                // Fallback for older browsers
+                fallbackCopyTextToClipboard(email, button);
+            }
+        }
+
+        // Fallback copy function for older browsers
+        function fallbackCopyTextToClipboard(text, button) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            textArea.style.top = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopySuccess(button);
+                } else {
+                    showCopyError(button);
+                }
+            } catch (err) {
+                showCopyError(button);
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        // Show copy success feedback
+        function showCopySuccess(button) {
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            button.classList.add('copy-success');
+
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.classList.remove('copy-success');
+            }, 2000);
+        }
+
+        // Show copy error feedback
+        function showCopyError(button) {
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-times"></i> Failed';
+            button.style.background = '#dc3545';
+            button.style.color = 'white';
+            button.style.borderColor = '#dc3545';
+
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.style.background = '';
+                button.style.color = '';
+                button.style.borderColor = '';
+            }, 2000);
+        }
+
+        // Function to ensure search overlay stays top-centered
+        function ensureSearchOverlayCentered() {
+            const searchOverlay = document.querySelector('.search-overlay');
+            if (searchOverlay) {
+                searchOverlay.style.position = 'absolute';
+                searchOverlay.style.top = '5%';
+                searchOverlay.style.left = '50%';
+                searchOverlay.style.transform = 'translate(-50%, 0)';
+                searchOverlay.style.display = 'flex';
+            }
+        }
+
+        // Load data from Google Sheets
+        async function loadFromGoogleSheets() {
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL);
+                if (!response.ok) return false;
+                const data = await response.json();
+                if (!data || data.length === 0) return false;
+
+                departmentData = data.map(item => ({
+                    department: item.department || '',
+                    name: item.name || '',
+                    designation: item.designation || '',
+                    extension: item.extension || '',
+                    mobile: item.mobile || '',
+                    email: item.email || ''
+                }));
+
+                // Save locally for offline use
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(departmentData));
+                } catch (e) { }
+
+                return true;
+            } catch (err) {
+                console.error('Error loading Google Sheets data:', err);
+                return false;
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', async function () {
+            try {
+                // 1. FAST INITIAL LOAD: Load from localStorage immediately so page shows up instantly
+                loadData();
+                displayResults(departmentData);
+                calculateStats();
+                setupDragDrop();
+            } catch (e) {
+                console.error("Initialization error:", e);
+            } finally {
+                // Trigger page start animation IMMEDIATELY so the user doesn't wait
+                document.body.classList.remove('page-loading');
+                document.body.classList.add('page-loaded');
+            }
+            
+            // Scroll reveal for professional animations
+            setupRevealAnimations();
+            // Ensure search overlay stays centered
+            ensureSearchOverlayCentered();
+
+            // 2. BACKGROUND UPDATES: Try to load from Local Database File or Google Sheets
+            let loadedFromDB = false;
+            try {
+                dbFileHandle = await getHandleFromIndexedDB();
+                if (dbFileHandle) {
+                    const opts = { mode: 'readwrite' };
+                    // If already granted, read it directly
+                    if ((await dbFileHandle.queryPermission(opts)) === 'granted') {
+                        const file = await dbFileHandle.getFile();
+                        const text = await file.text();
+                        departmentData = parseCSVTextToContacts(text);
+                        loadedFromDB = true;
+                        displayResults(departmentData);
+                        calculateStats();
+                        setTimeout(updateDBButton, 1000);
+                    }
+                }
+            } catch (e) {
+                console.error("Local DB load error", e);
+            }
+
+            if (!loadedFromDB) {
+                // Try to load from Google Sheets in the background
+                loadFromGoogleSheets().then(loadedFromSheets => {
+                    if (loadedFromSheets) {
+                        displayResults(departmentData);
+                        calculateStats();
+                    }
+                });
+            }
+
+            // Monitor for any changes that might affect positioning
+            setInterval(ensureSearchOverlayCentered, 1000);
+
+            // Start real-time sync (Auto refresh data every 3 seconds)
+            setInterval(async () => {
+                let currentSearchTerm = document.getElementById('search-input') ? document.getElementById('search-input').value.trim() : '';
+
+                if (dbFileHandle && (await dbFileHandle.queryPermission({ mode: 'read' })) === 'granted') {
+                    // Sync from Local Database File
+                    try {
+                        const file = await dbFileHandle.getFile();
+                        const text = await file.text();
+                        const newContacts = parseCSVTextToContacts(text);
+                        if (JSON.stringify(newContacts) !== JSON.stringify(departmentData)) {
+                            departmentData = newContacts;
+
+                            // Save to local storage quietly so refreshing doesn't lose it
+                            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(departmentData)); } catch (e) { }
+
+                            // Only redraw if not searching, or rerun search
+                            if (currentSearchTerm === '') {
+                                displayResults(departmentData);
+                            } else {
+                                handleSearch();
+                            }
+                            calculateStats();
+                        }
+                    } catch (e) { }
+                } else if (!dbFileHandle) {
+                    // Sync from Google Sheets
+                    try {
+                        const response = await fetch(GOOGLE_SCRIPT_URL);
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data && data.length > 0) {
+                                const newContacts = data.map(item => ({
+                                    department: item.department || '',
+                                    name: item.name || '',
+                                    designation: item.designation || '',
+                                    extension: item.extension || '',
+                                    mobile: item.mobile || '',
+                                    email: item.email || ''
+                                }));
+
+                                if (JSON.stringify(newContacts) !== JSON.stringify(departmentData)) {
+                                    departmentData = newContacts;
+
+                                    // Save to local storage quietly so refreshing doesn't lose it
+                                    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(departmentData)); } catch (e) { }
+
+                                    // Only redraw if not searching, or rerun search
+                                    if (currentSearchTerm === '') {
+                                        displayResults(departmentData);
+                                    } else {
+                                        handleSearch();
+                                    }
+                                    calculateStats();
+                                }
+                            }
+                        }
+                    } catch (e) { }
+                }
+            }, 3000); // Check every 3 seconds
+
+            // Begin title typing after page fade-in
+            setTimeout(() => document.body.classList.add('start-typing'), 700);
+        });
+
+        function setupRevealAnimations() {
+            const elements = document.querySelectorAll('.reveal');
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { rootMargin: '0px 0px -10% 0px', threshold: 0.12 });
+
+                elements.forEach(el => observer.observe(el));
+            } else {
+                // Fallback: show all
+                elements.forEach(el => el.classList.add('is-visible'));
+            }
+        }
+    </script>
+</body>
+
+</html>
